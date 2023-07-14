@@ -10,13 +10,13 @@ import (
 func TestRegistry(t *testing.T) {
 	r := registry.New[string, string]("test")
 
-	if _, ok := r.Get("foo"); ok {
+	if r.Get("foo") != nil {
 		t.Fatal("unexpected value")
 	}
 
 	r.Put("foo", "bar")
 
-	if v, ok := r.Get("foo"); !ok || *v != "bar" {
+	if *r.Get("foo") != "bar" {
 		t.Fatal("unexpected value")
 	}
 

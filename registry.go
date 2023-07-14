@@ -21,13 +21,13 @@ func New[K any, V any](name string) *Registry[K, V] {
 	}
 }
 
-// Get returns the value for the given key, or false if the key does not exist.
-func (r *Registry[K, V]) Get(key K) (*V, bool) {
+// Get returns a pointer to the value for the given key, or nil if the key does not exist.
+func (r *Registry[K, V]) Get(key K) *V {
 	value, ok := r.data.Load(key)
 	if !ok {
-		return nil, false
+		return nil
 	}
-	return value.(*V), true
+	return value.(*V)
 }
 
 // Put sets the value for the given key. If the key already exists, it panics.
@@ -40,7 +40,7 @@ func (r *Registry[K, V]) Put(key K, value V) {
 // TryPut sets the value for the given key. If the key already exists, it returns an error.
 func (r *Registry[K, V]) TryPut(key K, value V) error {
 	if _, exists := r.data.LoadOrStore(key, &value); exists {
-		return fmt.Errorf("registry(%v): %w: %v", r.name, ErrKeyExists, key)
+		return fmt.Errorf("registry(%s): %w: %v", r.name, ErrKeyExists, key)
 	}
 	return nil
 }
