@@ -20,15 +20,15 @@ func TestRegistry(t *testing.T) {
 		t.Fatal("unexpected value")
 	}
 
-	if err := r.ShouldStore("foo", "bar"); err == nil {
+	if err := r.Store("foo", "bar"); err == nil {
 		t.Fatal("expected error")
 	}
 
-	if err := r.ShouldStore("foo", "baz"); err == nil {
+	if err := r.Store("foo", "baz"); err == nil {
 		t.Fatal("expected error")
 	}
 
-	if err := r.ShouldStore("bar", "baz"); err != nil {
+	if err := r.Store("bar", "baz"); err != nil {
 		t.Fatal("unexpected error")
 	}
 

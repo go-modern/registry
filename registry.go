@@ -32,13 +32,13 @@ func (r *Registry[K, V]) Load(key K) *V {
 
 // MustStore sets the value for the given key. If the key already exists, it panics.
 func (r *Registry[K, V]) MustStore(key K, value V) {
-	if err := r.ShouldStore(key, value); err != nil {
+	if err := r.Store(key, value); err != nil {
 		panic(err)
 	}
 }
 
-// ShouldStore sets the value for the given key. If the key already exists, it returns an error.
-func (r *Registry[K, V]) ShouldStore(key K, value V) error {
+// Store sets the value for the given key. If the key already exists, it returns an error.
+func (r *Registry[K, V]) Store(key K, value V) error {
 	if _, exists := r.data.LoadOrStore(key, &value); exists {
 		return fmt.Errorf("registry(%s): %w: %v", r.name, ErrKeyExists, key)
 	}
