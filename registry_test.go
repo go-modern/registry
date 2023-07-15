@@ -10,31 +10,31 @@ import (
 func TestRegistry(t *testing.T) {
 	r := registry.New[string, string]("test")
 
-	if r.Get("foo") != nil {
+	if r.Load("foo") != nil {
 		t.Fatal("unexpected value")
 	}
 
-	r.Put("foo", "bar")
+	r.MustStore("foo", "bar")
 
-	if *r.Get("foo") != "bar" {
+	if *r.Load("foo") != "bar" {
 		t.Fatal("unexpected value")
 	}
 
-	if err := r.TryPut("foo", "bar"); err == nil {
+	if err := r.ShouldStore("foo", "bar"); err == nil {
 		t.Fatal("expected error")
 	}
 
-	if err := r.TryPut("foo", "baz"); err == nil {
+	if err := r.ShouldStore("foo", "baz"); err == nil {
 		t.Fatal("expected error")
 	}
 
-	if err := r.TryPut("bar", "baz"); err != nil {
+	if err := r.ShouldStore("bar", "baz"); err != nil {
 		t.Fatal("unexpected error")
 	}
 
-	shouldPanic(t, func() { r.Put("foo", "baz") })
+	shouldPanic(t, func() { r.MustStore("foo", "baz") })
 
-	shouldPanic(t, func() { r.Put("bar", "baz") })
+	shouldPanic(t, func() { r.MustStore("bar", "baz") })
 }
 
 func shouldPanic(t *testing.T, f func()) {
