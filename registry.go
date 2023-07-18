@@ -41,13 +41,13 @@ func (r *Registry[K, V]) Init(key K) (*V, error) {
 	return value, nil
 }
 
-// Default returns a pointer to the default value, or nil if the default is not set.
-func (r *Registry[K, V]) Default() *V {
+// Default returns a pointer to the default key and value, or nil if the default is not set.
+func (r *Registry[K, V]) Default() (*K, *V) {
 	key := r.defaultKey.Load()
 	if key == nil {
-		return nil
+		return nil, nil
 	}
-	return r.Load(*key)
+	return key, r.Load(*key)
 }
 
 // Load returns a pointer to the value for the given key, or nil if the key does not exist.
