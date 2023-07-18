@@ -3,15 +3,22 @@ package registry
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 )
 
-// ErrKeyExists is returned on TryPut when a key already exists in the registry.
-var ErrKeyExists = fmt.Errorf("key already exists")
+var (
+	// ErrKeyExists is returned when a key already exists in the registry.
+	ErrKeyExists = fmt.Errorf("key already exists")
+	// ErrKeyNoExist is returned when a key does not exist in the registry.
+	ErrKeyNoExist = fmt.Errorf("key does not exist")
+)
 
 // Registry is a thread-safe map that allows only one value per key.
 type Registry[K any, V any] struct {
 	name string
 	data sync.Map
+
+	defaultKey atomic.Pointer[K]
 }
 
 // New creates a new registry with the given name.
@@ -19,6 +26,28 @@ func New[K any, V any](name string) *Registry[K, V] {
 	return &Registry[K, V]{
 		name: name,
 	}
+}
+
+// Init sets the default key for the registry. It returns the default vallue or an error if the key
+// does not exist or is already set.
+func (r *Registry[K, V]) Init(key K) (*V, error) {
+	value := r.Load(key)
+	if value == nil {
+		return nil, fmt.Errorf("registry(%s): %w: %v", r.name, ErrKeyNoExist, key)
+	}
+	if !r.defaultKey.CompareAndSwap(nil, &key) {
+		return nil, fmt.Errorf("registry(%s): %w: %v", r.name, ErrKeyExists, key)
+	}
+	return value, nil
+}
+
+// Default returns a pointer to the default value, or nil if the default is not set.
+func (r *Registry[K, V]) Default() *V {
+	key := r.defaultKey.Load()
+	if key == nil {
+		return nil
+	}
+	return r.Load(*key)
 }
 
 // Load returns a pointer to the value for the given key, or nil if the key does not exist.

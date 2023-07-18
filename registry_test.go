@@ -35,6 +35,28 @@ func TestRegistry(t *testing.T) {
 	shouldPanic(t, func() { r.MustStore("foo", "baz") })
 
 	shouldPanic(t, func() { r.MustStore("bar", "baz") })
+
+	v := r.Default()
+	if v != nil {
+		t.Fatal("expected nil")
+	}
+
+	v, err := r.Init("foo")
+	if err != nil {
+		t.Fatal("unexpected error")
+	}
+	if *v != "bar" {
+		t.Fatal("unexpected value")
+	}
+
+	v = r.Default()
+	if *v != "bar" {
+		t.Fatal("unexpected value")
+	}
+	_, err = r.Init("foo")
+	if err == nil {
+		t.Fatal("expected error")
+	}
 }
 
 func shouldPanic(t *testing.T, f func()) {
